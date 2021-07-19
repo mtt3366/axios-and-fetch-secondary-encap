@@ -20,6 +20,17 @@ axios.post('/user/login', {
 });
 
 //fetch
+//get
 request('/user/list').then(data => {
+    console.log(data);
+});
+//post
+request('/user/login', {
+    method: 'POST',
+    body: {
+        account: '137000000',
+        password: '1234567890'
+    }
+}).then(data => {
     console.log(data);
 });

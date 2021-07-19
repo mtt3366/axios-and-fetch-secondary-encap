@@ -36,15 +36,15 @@ const isPlainObject = function isPlainObject(obj) {
     proto = Object.getPrototypeOf(obj);
     if (!proto) return true;
     Ctor = proto.hasOwnProperty('constructor') && proto.constructor;
-    return typeof Ctor === "function" && Ctor === Object;
+    return typeof Ctor === "function" && Ctor === Object;//构造函数是Object
 };
 
 // 发送数据请求
 const request = function request(url, config) {
     // 合并配置项{不要去更改inital中的内容}
-    (config == null || typeof config !== "object") ? config = {}: null;
+    (config == null || typeof config !== "object") ? config = {}: null;//确保config肯定是对象
     if (config.headers && isPlainObject(config.headers)) {
-        // 单独的给HEADERS进行深度合并
+        // 单独的给HEADERS先进行深度合并
         config.headers = Object.assign({}, inital.headers, config.headers);
     }
     let {
@@ -55,28 +55,29 @@ const request = function request(url, config) {
         credentials,
         responseType,
         cache
-    } = Object.assign({}, inital, config);
+    } = Object.assign({}, inital, config);//和饼config
 
     // 处理URL{格式校验 & 公共前缀 & 拼接params中的信息到URL的末尾}
     if (typeof url !== "string") throw new TypeError(`${url} is not an string!`);
-    if (!/^http(s?):\/\//i.test(url)) url = baseURL + url;
-    if (params != null) {
+    if (!/^http(s?):\/\//i.test(url)) url = baseURL + url;//判断是不是以http或者https开头,如果不是,就用baseurl拼起来
+    if (params != null) {//不是null和undefined,存在params
         if (isPlainObject(params)) {
             params = Qs.stringify(params);
         }
-        url += `${url.includes('?')?'&':'?'}${params}`;
+        url += `${url.includes('?')?'&':'?'}${params}`;//拼接
     }
 
     // 处理请求主体的数据格式{根据headers中的Content-Type处理成为指定的格式}
     if (body != null) {
         if (isPlainObject(body)) {
-            let contentType = headers['Content-Type'] || 'application/json';
+            let contentType = headers['Content-Type'] || 'application/json';//默认application/json
             if (contentType.includes('urlencoded')) body = Qs.stringify(body);
             if (contentType.includes('json')) body = JSON.stringify(body);
         }
     }
 
     // 处理credentials{如果传递的是true,我们让其为include,否则是same-origin}
+    //include,允许跨域请求当中携带资源凭证,same-origin,允许同源性请求当中携带资源凭证
     credentials = credentials ? 'include' : 'same-origin';
 
     // 基于fetch请求数据
@@ -90,7 +91,8 @@ const request = function request(url, config) {
     };
     /^(POST|PUT|PATCH)$/i.test(method) ? config.body = body : null;
     return fetch(url, config).then(function onfulfilled(response) {
-        // 不一定是成功的：Fetch的特点的是，只要服务器有返回结果，不论状态码是多少，它都认为是成功
+        // 走到这边不一定是成功的：
+        // Fetch的特点的是，只要服务器有返回结果，不论状态码是多少，它都认为是成功
         let {
             status,
             statusText
