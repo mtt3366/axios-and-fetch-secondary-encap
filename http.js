@@ -1,13 +1,15 @@
 axios.defaults.baseURL = 'http://localhost:9999';
 // 设置超时时间{10S} & 设置跨域请求中是否携带资源凭证
 axios.defaults.timeout = 10000;
-axios.defaults.withCredentials = true;
+axios.defaults.withCredentials = true;//默认允许携带资源凭证（后台有的时不允许携带资源凭证的，就要自己手动设置）
 // 配置公共的自定义请求头信息  headers['common']/headers['post/get...']/headers/...
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 // POST系列请求对于请求主体信息的统一格式化
 axios.defaults.transformRequest = function (data, headers) {
+    //如果不是对象，直接返回，例如字符串
     if (data === null || typeof data !== "object") return data;
     let contentType = headers['Content-Type'] || headers.post['Content-Type'];
+    //对urlencoded和json格式的body信息进行格式化
     if (contentType.includes('urlencoded')) return Qs.stringify(data);
     if (contentType.includes('json')) return JSON.stringify(data);
     return data;
@@ -30,6 +32,8 @@ axios.interceptors.request.use(function (config) {
 // 响应拦截器，当前请求有结果之后，我们在业务层自己调用then/catch方法之间拦截一下，这样可以做一些成功或者失败的统一提示处理等...
 axios.interceptors.response.use(function onfulfilled(response) {
     // 成功:服务器正常返回结果 & validateStatus状态码校验成功
+    //这里可以做一些与本公司业务有关的判断，例如错误的统一提示等
+    //。。。
     return response.data;
 }, function onrejected(reason) {
     // 失败:@1服务器返回了结果但是状态码没有经过validateStatus校验 || @2服务器压根没有返回任何的结果 || @3请求中断或者超时...
@@ -49,7 +53,7 @@ axios.interceptors.response.use(function onfulfilled(response) {
             // @2
         }
     }
-    return Promise.reject(reason);
+    return Promise.reject(reason);//保证promise到业务层还是失败的
 });
 
 export default axios;
